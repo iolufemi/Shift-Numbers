@@ -254,7 +254,7 @@
      */
     function weekendDay(){
         $this->weekendDay = date('l');
-        $treatedDay = 'saturday';//strtolower($this->weekendDay);
+        $treatedDay = strtolower($this->weekendDay);
         if($treatedDay == 'saturday'){
             return $treatedDay;
         }elseif($treatedDay == 'sunday'){
