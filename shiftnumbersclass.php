@@ -3,14 +3,15 @@
 /**
  * @author Olanipekun Israel Olufemi
  * @name Shift Numbers
- * @version 0.1
+ * @version 0.2
  * @license GPL V3
  * @link https://github.com/iolufemi/Shift-Numbers
  * @copyright 2013 Olanipekun Israel Olufemi
  * @tutorial Just set the class variables and input the phonenumbers in the datafile you have set in
- * this manner(without qoutes) "08056552980/Morning - 08076876565/Night - 08078767654/Default". Use morning for the 
+ * this manner(without qoutes) "080456552980/Night/Weekend - 080456552980/Morning/Weekend - 08056552980/Morning - 08076876565/Night - 08078767654/Default". Use morning for the 
  * phone numbers to display in the morning shift, night for night shift, and 
  * default for the default phone number(this will show in the free times.)
+ * This Version now support weekend shifts
  * 
  * This is a script that will change the customer support phone numbers on the whogohost 
  * website according to the custommer care representatives on shift. NO NEED FOR DATABASE! :)
@@ -38,6 +39,7 @@
     private $morningEnd = '17:00';
     private $nightStart = '21:00';
     private $nightEnd = '07:00';
+    private $weekend;
     
     /**
      * shiftNumbers::__construct()
@@ -61,17 +63,36 @@
         }
         foreach($treatedShifts as $phoneNumbers){
             $splitPhoneNumbers = explode('/',$phoneNumbers);
-            if(in_array('morning',$splitPhoneNumbers)){
-                $thenumber['number'] = $splitPhoneNumbers[0];
-                $thenumber['start'] = $this->getMorningShiftStartTime();
-                $thenumber['end'] = $this->getMorningShiftEndTime();
-                $numbers[] = $thenumber; 
-            }
-            if(in_array('night',$splitPhoneNumbers)){
-                $thenumber['number'] = $splitPhoneNumbers[0];
-                $thenumber['start'] = $this->getNightShiftStartTime();
-                $thenumber['end'] = $this->getNightShiftEndTime();
-                $numbers[] = $thenumber; 
+            if($this->isWeekend()){
+               if(in_array('weekend',$splitPhoneNumbers)){
+                if(in_array('morning',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getMorningShiftStartTime();
+                    $thenumber['end'] = $this->getMorningShiftEndTime();
+                    $numbers[] = $thenumber; 
+                }
+                if(in_array('night',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getNightShiftStartTime();
+                    $thenumber['end'] = $this->getNightShiftEndTime();
+                    $numbers[] = $thenumber; 
+                }
+               }
+            }else{
+                if(!in_array('weekend',$splitPhoneNumbers)){
+                    if(in_array('morning',$splitPhoneNumbers)){
+                        $thenumber['number'] = $splitPhoneNumbers[0];
+                        $thenumber['start'] = $this->getMorningShiftStartTime();
+                        $thenumber['end'] = $this->getMorningShiftEndTime();
+                        $numbers[] = $thenumber; 
+                    }
+                    if(in_array('night',$splitPhoneNumbers)){
+                        $thenumber['number'] = $splitPhoneNumbers[0];
+                        $thenumber['start'] = $this->getNightShiftStartTime();
+                        $thenumber['end'] = $this->getNightShiftEndTime();
+                        $numbers[] = $thenumber; 
+                    }
+                    }
             }
         }
         return $numbers;
@@ -162,7 +183,7 @@
      * @return unix time format
      */
     private function getNightShiftEndTime(){
-        $time = strtotime($this->nightEnd);
+        $time = strtotime($this->nightEnd) + 86400;
         return $time;
     }
     
@@ -175,18 +196,9 @@
         $time = $this->getCurrentTime();
         $shift = $this->getPhoneNumbersWithShiftTimes();
         $count = count($shift);
-        $last = $count - 1;
-        if($count > 1){
-            $comma = ', ';
-        }else{
-            $comma = '';
-        }
         for($c = 0; $c < $count; $c++){
-            if($c == $last){
-                $comma = '';
-            }
             if($shift[$c]['start'] <= $time && $time <= $shift[$c]['end']){
-                $thenumber[$c] = $shift[$c]['number'].$comma;
+                $thenumber[$c] = $shift[$c]['number'];
             }
             
         }
@@ -195,29 +207,12 @@
     
         /**
      * shiftNumbers::currentShiftPhoneNumbersAsString()
-     * returns the current shift phone number
+     * returns the current shift phone number as string
      * @return string
      */
     public function currentShiftPhoneNumbersAsString(){
-        $theString = '';
-        $time = $this->getCurrentTime();
-        $shift = $this->getPhoneNumbersWithShiftTimes();
-        $count = count($shift);
-        $last = $count - 1;
-        if($count > 1){
-            $comma = ', ';
-        }else{
-            $comma = '';
-        }
-        for($c = 0; $c < $count; $c++){
-            if($c == $last){
-                $comma = '';
-            }
-            if($shift[$c]['start'] <= $time && $time <= $shift[$c]['end']){
-                $theString .= $shift[$c]['number'].$comma;
-            }
-            
-        }
+        $theArray = $this->currentShiftPhoneNumbers();
+        $theString = implode(', ',$theArray);
         return $theString;
     }
     
@@ -229,29 +224,27 @@
     public function run(){
         $default = $this->getDefault();
         $check = $this->currentShiftPhoneNumbers();
-        $count = count($default);
-        $last  = $count - 1;
-        $thestring = "";
         if(!$check){
-        if($count > 1){
-            $comma = ', ';
+        $theString = implode(', ',$default);
         }else{
-            $comma = '';
+        $theString = implode(', ',$check);
         }
-        $c = 0;
-            foreach($default as $defaults){
-                if($c == $last){
-                    $comma = '';
-                }
-                $thestring .= $defaults.$comma;
-                $c++;
-        }
+        echo $theString;
+    }
+    
+    /**
+     * shiftNumbers::isWeekend()
+     * Checks if the day is a weekend
+     * @return boolean
+     */
+    function isWeekend(){
+        $this->weekend = date('l');
+        $treatedDay = strtolower($this->weekend);
+        if($treatedDay == 'saturday' || $treatedDay == 'sunday'){
+            return true;
         }else{
-            foreach($check as $phoneNumber){
-                $thestring .= $phoneNumber;
-            }
+            return false;
         }
-        echo $thestring;
     }
  }
  

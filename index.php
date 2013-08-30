@@ -7,4 +7,6 @@ $foo = new shiftNumbers;
 $foo->run();
 //echo $foo->currentShiftPhoneNumbersAsString();
 //print_r($foo->currentShiftPhoneNumbers());
+//$c = $foo->isWeekend();
+//echo $c;
  ?>
