@@ -3,7 +3,7 @@
 /**
  * @author Olanipekun Israel Olufemi
  * @name Shift Numbers
- * @version 0.2
+ * @version 1.0
  * @license GPL V3
  * @link https://github.com/iolufemi/Shift-Numbers
  * @copyright 2013 Olanipekun Israel Olufemi
