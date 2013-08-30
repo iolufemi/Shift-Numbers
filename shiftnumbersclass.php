@@ -3,15 +3,15 @@
 /**
  * @author Olanipekun Israel Olufemi
  * @name Shift Numbers
- * @version 0.2
+ * @version 1.0 Beta
  * @license GPL V3
  * @link https://github.com/iolufemi/Shift-Numbers
  * @copyright 2013 Olanipekun Israel Olufemi
  * @tutorial Just set the class variables and input the phonenumbers in the datafile you have set in
- * this manner(without qoutes) "080456552980/Night/Weekend - 080456552980/Morning/Weekend - 08056552980/Morning - 08076876565/Night - 08078767654/Default". Use morning for the 
+ * this manner(without qoutes) "0809448787676/Saturday/Morning - 0909871187678/Saturday/Night - 0809872287676/Sunday/Morning - 0909878337678/Sunday/Night - 08056552980/Morning - 08076876565/Night - 08078767654/Default". Use morning for the 
  * phone numbers to display in the morning shift, night for night shift, and 
  * default for the default phone number(this will show in the free times.)
- * This Version now support weekend shifts
+ * This Version now support weekend shifts with seperate numbers for sunday and sarturday
  * 
  * This is a script that will change the customer support phone numbers on the whogohost 
  * website according to the custommer care representatives on shift. NO NEED FOR DATABASE! :)
@@ -39,7 +39,7 @@
     private $morningEnd = '17:00';
     private $nightStart = '21:00';
     private $nightEnd = '07:00';
-    private $weekend;
+    private $weekendDay;
     
     /**
      * shiftNumbers::__construct()
@@ -63,8 +63,23 @@
         }
         foreach($treatedShifts as $phoneNumbers){
             $splitPhoneNumbers = explode('/',$phoneNumbers);
-            if($this->isWeekend()){
-               if(in_array('weekend',$splitPhoneNumbers)){
+            if($this->weekendDay() == 'sunday'){
+               if(in_array('sunday',$splitPhoneNumbers)){
+                if(in_array('morning',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getMorningShiftStartTime();
+                    $thenumber['end'] = $this->getMorningShiftEndTime();
+                    $numbers[] = $thenumber; 
+                }
+                if(in_array('night',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getNightShiftStartTime();
+                    $thenumber['end'] = $this->getNightShiftEndTime();
+                    $numbers[] = $thenumber; 
+                }
+               }
+            }elseif($this->weekendDay() == 'saturday'){
+               if(in_array('saturday',$splitPhoneNumbers)){
                 if(in_array('morning',$splitPhoneNumbers)){
                     $thenumber['number'] = $splitPhoneNumbers[0];
                     $thenumber['start'] = $this->getMorningShiftStartTime();
@@ -79,7 +94,7 @@
                 }
                }
             }else{
-                if(!in_array('weekend',$splitPhoneNumbers)){
+                if(!in_array('saturday',$splitPhoneNumbers) && !in_array('sunday',$splitPhoneNumbers)){
                     if(in_array('morning',$splitPhoneNumbers)){
                         $thenumber['number'] = $splitPhoneNumbers[0];
                         $thenumber['start'] = $this->getMorningShiftStartTime();
@@ -233,15 +248,17 @@
     }
     
     /**
-     * shiftNumbers::isWeekend()
-     * Checks if the day is a weekend
+     * shiftNumbers::weekendDay()
+     * gets the weekend day if the day is a weekend
      * @return boolean
      */
-    function isWeekend(){
-        $this->weekend = date('l');
-        $treatedDay = strtolower($this->weekend);
-        if($treatedDay == 'saturday' || $treatedDay == 'sunday'){
-            return true;
+    function weekendDay(){
+        $this->weekendDay = date('l');
+        $treatedDay = 'saturday';//strtolower($this->weekendDay);
+        if($treatedDay == 'saturday'){
+            return $treatedDay;
+        }elseif($treatedDay == 'sunday'){
+            return $treatedDay;
         }else{
             return false;
         }
