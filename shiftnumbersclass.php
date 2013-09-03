@@ -132,7 +132,9 @@
                     }
             }
         }
-        return $numbers;     
+        if(isset($numbers)){
+            return $numbers;
+        }
     }
     
     /**
@@ -152,7 +154,9 @@
                  $numbers[] = $splitPhoneNumbers[0];
             }
         }
-        return $numbers;
+        if(isset($numbers)){
+            return $numbers;
+        }
     }
     
     /**
@@ -243,7 +247,9 @@
             }
             
         }
-        return $thenumber;
+        if(isset($thenumber)){
+            return $thenumber;
+        }
     }
     
         /**
@@ -254,7 +260,9 @@
     public function currentShiftPhoneNumbersAsString(){
         $theArray = $this->currentShiftPhoneNumbers();
         $theString = implode(', ',$theArray);
-        return $theString;
+        if(isset($theString)){
+            return $theString;
+        }
     }
     
     /**
