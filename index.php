@@ -9,4 +9,6 @@ $foo->run();
 //print_r($foo->currentShiftPhoneNumbers());
 //$c = $foo->isWeekend();
 //echo $c;
+//$foo->getPhoneNumbersWithShiftTimes();
+//$foo->isWeekend();
  ?>
