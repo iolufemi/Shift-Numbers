@@ -3,7 +3,11 @@
 /**
  * @author Olanipekun Israel Olufemi
  * @name Shift Numbers
+<<<<<<< HEAD
  * @version 1.0
+=======
+ * @version 2.0
+>>>>>>> custom
  * @license GPL V3
  * @link https://github.com/iolufemi/Shift-Numbers
  * @copyright 2013 Olanipekun Israel Olufemi
@@ -40,6 +44,7 @@
     private $nightStart = '21:00';
     private $nightEnd = '07:00';
     private $weekend;
+    private $weekendDay;
     
     /**
      * shiftNumbers::__construct()
@@ -55,7 +60,7 @@
      * returns an array of the phone numbers mapped with their shift time.
      * @return array
      */
-    private function getPhoneNumbersWithShiftTimes(){
+     function getPhoneNumbersWithShiftTimes(){
         $fileData = file_get_contents($this->getDataFilePath());
         $splitData = explode('-',$fileData);
         foreach($splitData as $shifts){
@@ -63,23 +68,59 @@
         }
         foreach($treatedShifts as $phoneNumbers){
             $splitPhoneNumbers = explode('/',$phoneNumbers);
-            if($this->isWeekend()){
-               if(in_array('weekend',$splitPhoneNumbers)){
+            if($this->weekendDay() == 'sunday'){
+               if(in_array('sunday',$splitPhoneNumbers)){
                 if(in_array('morning',$splitPhoneNumbers)){
                     $thenumber['number'] = $splitPhoneNumbers[0];
                     $thenumber['start'] = $this->getMorningShiftStartTime();
                     $thenumber['end'] = $this->getMorningShiftEndTime();
                     $numbers[] = $thenumber; 
+                    $chec_ = true;
                 }
                 if(in_array('night',$splitPhoneNumbers)){
                     $thenumber['number'] = $splitPhoneNumbers[0];
                     $thenumber['start'] = $this->getNightShiftStartTime();
                     $thenumber['end'] = $this->getNightShiftEndTime();
                     $numbers[] = $thenumber; 
+                    $chec_ = true;
                 }
                }
+            }elseif($this->weekendDay() == 'saturday'){
+               if(in_array('saturday',$splitPhoneNumbers)){
+                if(in_array('morning',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getMorningShiftStartTime();
+                    $thenumber['end'] = $this->getMorningShiftEndTime();
+                    $numbers[] = $thenumber; 
+                    $chec_ = true;
+                }
+                if(in_array('night',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getNightShiftStartTime();
+                    $thenumber['end'] = $this->getNightShiftEndTime();
+                    $numbers[] = $thenumber; 
+                    $chec_ = true;
+                }
+               }
+            }
+            if($this->isWeekend() && !isset($chec_)){
+               if(in_array('weekend',$splitPhoneNumbers)){
+                
+                if(in_array('morning',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getMorningShiftStartTime();
+                    $thenumber['end'] = $this->getMorningShiftEndTime();
+                    $numbers[] = $thenumber; 
+                    }
+                if(in_array('night',$splitPhoneNumbers)){
+                    $thenumber['number'] = $splitPhoneNumbers[0];
+                    $thenumber['start'] = $this->getNightShiftStartTime();
+                    $thenumber['end'] = $this->getNightShiftEndTime();
+                    $numbers[] = $thenumber; 
+               }
+               }
             }else{
-                if(!in_array('weekend',$splitPhoneNumbers)){
+                if(!in_array('saturday',$splitPhoneNumbers) && !in_array('sunday',$splitPhoneNumbers) && !in_array('weekend',$splitPhoneNumbers)){
                     if(in_array('morning',$splitPhoneNumbers)){
                         $thenumber['number'] = $splitPhoneNumbers[0];
                         $thenumber['start'] = $this->getMorningShiftStartTime();
@@ -95,8 +136,9 @@
                     }
             }
         }
-        return $numbers;
-        
+        if(isset($numbers)){
+            return $numbers;
+        }
     }
     
     /**
@@ -116,7 +158,9 @@
                  $numbers[] = $splitPhoneNumbers[0];
             }
         }
-        return $numbers;
+        if(isset($numbers)){
+            return $numbers;
+        }
     }
     
     /**
@@ -173,7 +217,12 @@
      * @return unix time format
      */
     private function getNightShiftStartTime(){
-        $time = strtotime($this->nightStart);
+        if(strtotime('00:00') <= $this->getCurrentTime() && $this->getCurrentTime() <= strtotime($this->nightEnd)){
+            $time = strtotime($this->nightStart) - 86400;
+        }else{
+            $time = strtotime($this->nightStart);
+        }
+        
         return $time;
     }
     
@@ -202,7 +251,9 @@
             }
             
         }
-        return $thenumber;
+        if(isset($thenumber)){
+            return $thenumber;
+        }
     }
     
         /**
@@ -213,7 +264,9 @@
     public function currentShiftPhoneNumbersAsString(){
         $theArray = $this->currentShiftPhoneNumbers();
         $theString = implode(', ',$theArray);
-        return $theString;
+        if(isset($theString)){
+            return $theString;
+        }
     }
     
     /**
@@ -238,14 +291,33 @@
      * @return boolean
      */
     function isWeekend(){
-        $this->weekend = date('l');
-        $treatedDay = strtolower($this->weekend);
+        $this->weekend = $this->weekendDay();
+        $treatedDay = $this->weekend;
         if($treatedDay == 'saturday' || $treatedDay == 'sunday'){
             return true;
         }else{
             return false;
         }
     }
+    
+        
+    /**
+     * shiftNumbers::weekendDay()
+     * gets the weekend day if the day is a weekend
+     * @return boolean
+     */
+    function weekendDay(){
+        $this->weekendDay = date('l');
+        $treatedDay = strtolower($this->weekendDay);
+        if($treatedDay == 'saturday'){
+            return $treatedDay;
+        }elseif($treatedDay == 'sunday'){
+            return $treatedDay;
+        }else{
+            return false;
+        }
+    }
+
  }
  
 ?>
